@@ -1,18 +1,16 @@
 package Model;
 
-import Simulation.Simulation;
-
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class LoopControl implements SimulationObject {
 
     private int hyperloopState;
-    private ArrayList<SimulationObject> capsules;
+    private ArrayList<Capsule> capsules;
     private Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public LoopControl() {
-        capsules = new ArrayList<SimulationObject>();
+        capsules = new ArrayList<Capsule>();
     }
 
     @Override
@@ -21,9 +19,9 @@ public class LoopControl implements SimulationObject {
     }
 
     @Override
-    public void receiveSignal(Signal signal) {
-        LOGGER.info(Simulation.timeInSimulation + ": " + signal.toString());
-        switch (signal) {
+    public void receiveSignal(Signal signal, Capsule sender) {
+        /*LOGGER.info(Simulation.timeInSimulation + ": " + signal.toString());*/
+        /*switch (signal) {
             case FIRE:
                 notifyAllCapsules(Signal.EMERGENCY_BREAK);
                 break;
@@ -34,18 +32,18 @@ public class LoopControl implements SimulationObject {
                 // do nothing
                 break;
         }
-    }
-
-    public void register(SimulationObject capsule) {
-        capsules.add(capsule);
-    }
-
-    public void notifyAllCapsules(Signal signal) {
-        for (SimulationObject capsule : capsules) {
-            capsule.receiveSignal(signal);
+        */
+        // notifiying all capsules.
+        for (Capsule capsule : capsules) {
+            if(capsule != sender){
+                capsule.receiveSignal(signal, sender);
+            }
         }
     }
 
+    public void register(Capsule capsule) {
+        capsules.add(capsule);
+    }
 
 
 }

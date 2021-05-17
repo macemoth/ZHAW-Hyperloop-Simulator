@@ -5,5 +5,6 @@ public enum CapsuleState {
     TRAVELLING,
     EMERGENCY,
     EMERGENCY_BRAKE,
+    BRAKE,
     ARRIVED;
 }

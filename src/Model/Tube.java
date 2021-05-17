@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Tube implements SimulationObject {
     private int MOTOR_A = 10; // acceleration is assumed 10 m/s^2
-    private int BRAKE_A = -10; // normal brake deceleration is assumed -20 m/s^2
+    private int BRAKE_A = -10; // normal brake deceleration is assumed -10 m/s^2
     private int SAIL_A = 0; // we assume no resistance at all
     private ArrayList<SimulationObject> capsules;
     public int[] accelerationProfile;
@@ -40,12 +40,12 @@ public class Tube implements SimulationObject {
     }
 
     @Override
-    public void receiveSignal(Signal signal) {
+    public void receiveSignal(Signal signal, Capsule sender) {
 
     }
 
     @Override
-    public void register(SimulationObject simulationObject) {
+    public void register(Capsule simulationObject) {
         capsules.add(simulationObject);
     }
 
