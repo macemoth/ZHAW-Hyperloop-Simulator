@@ -1,5 +1,6 @@
 package Model;
 
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,10 +15,12 @@ public class Capsule implements SimulationObject {
     public int v;
     private int a;
     private Capsule capsuleInFront;
-    private int minDistance = 2000;  // min safe distance to next capsule
+    private int MIN_DISTANCE = 2000;  // min safe distance to next capsule
+    private int COLLISION_DISTANCE = 5;  // min safe distance to next capsule
     private int minVdifference = 200;
     private int arrivalEps = 50; // consider the tube's last 50m as arrived.    what is EPS ?
     private Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private Random random;
 
     // graphical elements
     private final static int capsuleHeight = 10;
@@ -38,6 +41,7 @@ public class Capsule implements SimulationObject {
         this.capsuleInFront = capsuleInFront;
         this.loopControl = loopControl;
         this.tube = tube;
+        random = new Random();
         state = CapsuleState.SAFE;
         //register(loopControl);
         //register(tube);
@@ -49,13 +53,12 @@ public class Capsule implements SimulationObject {
     // updating the capsule by time change. It mostly makes sense to always
     // define that as 1 but whatever.
     public void update(int dt) {
-        //lookAhead();
         switch (state) {
             case TRAVELLING:
                 calculateAcceleration();
                 move(dt);
                 checkBrakeDistance();
-                //lookAhead();
+                lookAhead();
                 createRandomAccident();
                 break;
             case SAFE: // do nothing
@@ -114,7 +117,7 @@ public class Capsule implements SimulationObject {
         */
         if(state == CapsuleState.TRAVELLING) {
             int distance = sender.pos - pos;
-            if (distance < minDistance && distance > 0) {
+            if (distance < MIN_DISTANCE && distance > 0) {
                 state = CapsuleState.EMERGENCY_BRAKE;
             }
             if (distance > 0) {
@@ -143,9 +146,11 @@ public class Capsule implements SimulationObject {
     // not as fast as the capsule then change state to emergency.
     public void lookAhead() {
         if(capsuleInFront != null) {
-            if (capsuleInFront.pos < minDistance && (v > capsuleInFront.v - minVdifference)
-                && capsuleInFront.state != CapsuleState.ARRIVED) {
+            if (Math.abs(capsuleInFront.pos - this.pos) < COLLISION_DISTANCE
+                    && capsuleInFront.state != CapsuleState.ARRIVED
+                    && state != CapsuleState.ARRIVED) {
                 loopControl.receiveSignal(Signal.EMERGENCY_BREAK, this);
+                LOGGER.log(Level.INFO, "ID: " + this.id + " collision occurred with " + capsuleInFront.id);
                 state = CapsuleState.EMERGENCY;
                 return;
             }
@@ -171,27 +176,27 @@ public class Capsule implements SimulationObject {
     }
 
     public void createRandomAccident(){
-        double x = Math.random();
+        double x = random.nextDouble();
         if(x < 0.001 && pos > 1000){
             randomAccident();
         }
     }
 
     public void randomAccident() {
-        double x = Math.random();
+        double x = random.nextDouble();
         if(x < 0.333){
             loopControl.receiveSignal(Signal.FIRE, this);
-            LOGGER.log(Level.INFO, "ID: " + this.id + Signal.FIRE.name());
+            LOGGER.log(Level.INFO, "ID: " + this.id + " " + Signal.FIRE.name());
             currentSignal = Signal.FIRE;
         }
         else if(x > 0.666){
             loopControl.receiveSignal(Signal.EXCESSIVE_HEAT, this);
-            LOGGER.log(Level.INFO, "ID: " + this.id + Signal.EXCESSIVE_HEAT.name());
+            LOGGER.log(Level.INFO, "ID: " + this.id + " " + Signal.EXCESSIVE_HEAT.name());
             currentSignal = Signal.EXCESSIVE_HEAT;
         }
         else if(x > 0.333){
             loopControl.receiveSignal(Signal.PRESSURE_DROP, this);
-            LOGGER.log(Level.INFO, "ID: " + this.id + Signal.PRESSURE_DROP.name());
+            LOGGER.log(Level.INFO, "ID: " + this.id + " " + Signal.PRESSURE_DROP.name());
             currentSignal = Signal.PRESSURE_DROP;
         }
         state = CapsuleState.EMERGENCY_BRAKE;

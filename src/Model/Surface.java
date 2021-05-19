@@ -1,10 +1,10 @@
 package Model;
 
 import javax.swing.*;
-import javax.xml.stream.FactoryConfigurationError;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("Duplicates")
 public class Surface extends JPanel implements ActionListener {
@@ -17,6 +17,8 @@ public class Surface extends JPanel implements ActionListener {
     public Timer simulationTimer;
     private final int DELAY = 1;
     private int simulationTime = 0;
+    private int SIM_REPETITIONS = 3000;
+    private int repetition = 1;
 
     // Settings of simulation
     private final int S_PER_STEP = 1; // how many seconds per step are executed in model.
@@ -39,6 +41,13 @@ public class Surface extends JPanel implements ActionListener {
         MODEL = Model.defaultInit();
     }
 
+    public void reset() {
+//        blinktimer.restart();
+//        simulationTimer.restart();
+        simulationTime = 0;
+        MODEL = Model.defaultInit();
+    }
+
     public void Experiment1(){
 
         Capsule capsule0 = MODEL.simulationObjects.get(0);
@@ -51,6 +60,18 @@ public class Surface extends JPanel implements ActionListener {
         for( Capsule capsule : MODEL.simulationObjects){
             if(capsule.state == CapsuleState.EMERGENCY){
                 accident = true;
+                try {
+                    if(repetition < SIM_REPETITIONS){
+                        TimeUnit.MILLISECONDS.sleep(1);
+                        repetition++;
+                        reset();
+                        accident = false;
+                        System.out.println("Starting repetition " + repetition);
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         if(!accident) {

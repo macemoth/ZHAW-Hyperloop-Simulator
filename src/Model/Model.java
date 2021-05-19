@@ -7,7 +7,6 @@ public class Model {
     public Tube tube;
     public LoopControl loopControl;
     public ArrayList<Capsule> simulationObjects;
-    private int numberOfCapsules;
 
     // model defines the general structure to be simulated. contains capsules
     // a tube and a loopControl unit.
